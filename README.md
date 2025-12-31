@@ -15,7 +15,7 @@ So I built fixes for all of it.
 
 ## What's Here
 
-**8 hooks** that intercept Claude's workflow at key moments. Safety gates, logging, voice notifications.
+**Two hook systems** — Python hooks for core functionality, TypeScript hooks for extended capabilities.
 
 **5 specialized agents** for debugging, research, writing, refactoring, and security scanning.
 
@@ -27,9 +27,11 @@ So I built fixes for all of it.
 
 ## The Hooks
 
-Every hook runs via `uv run`. Configuration lives in `settings.json`.
+Two hook systems run in parallel. Python hooks via `uv run` handle core functionality. TypeScript hooks via `bun run` handle extended features. Configuration lives in `settings.json`.
 
-### `pre_tool_use.py`
+### Python Hooks (Core)
+
+#### `pre_tool_use.py`
 
 The safety gate. Runs before Claude executes any tool.
 
@@ -39,23 +41,23 @@ It blocks:
 
 Everything else gets logged to `logs/pre_tool_use.json`. Every tool call, timestamped. Useful when you need to reconstruct what Claude did.
 
-### `post_tool_use.py`
+#### `post_tool_use.py`
 
 Records results of every tool call. When something breaks, you'll know exactly what happened.
 
-### `notification.py`
+#### `notification.py`
 
 When Claude stops and waits for input, this hook speaks: "Your agent needs your input." Out loud. Through your speakers.
 
 You can leave the room. You'll know when to come back.
 
-### `session_start.py`
+#### `session_start.py`
 
 Runs when you start a session. Checks your git branch, loads `CONTEXT.md` and `TODO.md` if they exist, pulls recent GitHub issues if `gh` CLI is installed.
 
 Claude starts each session knowing what you're working on.
 
-### `stop.py`
+#### `stop.py`
 
 When Claude finishes:
 1. An LLM generates a completion message
@@ -64,13 +66,28 @@ When Claude finishes:
 
 Instead of silence, Claude says "All done, ready for your next task." Small change. Different feel.
 
-### `user_prompt_submit.py`
+#### `user_prompt_submit.py`
 
 Logs every prompt you send. Also generates unique agent names through an LLM—names like "Phoenix" or "Catalyst" instead of "Agent-1234."
 
-### `pre_compact.py` and `subagent_stop.py`
+#### `pre_compact.py` and `subagent_stop.py`
 
 Handle context compaction and subagent completion. Plumbing. Necessary plumbing.
+
+### TypeScript Hooks (Extended)
+
+These run via `bun` from `~/.config/pai/hooks/`. They add:
+
+- **security-validator.ts** — Extra validation layer for Bash commands
+- **capture-all-events.ts** — Comprehensive event logging across all hook types
+- **stop-hook-history.ts** — Saves session history on stop
+- **stop-hook-voice.ts** — Additional voice notifications
+- **subagent-stop-hook.ts** — Subagent completion handling
+- **subagent-stop-hook-voice.ts** — Voice notifications for subagents
+- **update-tab-titles.ts** — Dynamic terminal tab naming
+- **initialize-session.ts** — Session initialization
+- **load-core-context.ts** — Loads CORE skill context at session start
+- **capture-session-summary.ts** — Captures summary when session ends
 
 ## The Agents
 
@@ -92,7 +109,9 @@ Research first, write second. Gathers context from your codebase and session, th
 
 ### `production-refactor`
 
-Handles the tedious work of renaming, restructuring, and modernizing. Doesn't break things.
+Transforms prototype code into production-grade systems. Performs dependency analysis before touching anything. Maps all imports, traces data flow, assesses risk levels. Makes incremental changes with verification at each step.
+
+Never changes public interfaces without approval. Never deletes functionality without confirming it's unused.
 
 ### `security-vulnerability-hunter`
 
@@ -128,6 +147,22 @@ Visual content generation with Excalidraw hand-drawn aesthetic. Technical diagra
 
 The skill that creates skills. Enforces structure, validates format, handles canonicalization.
 
+## Additional Features
+
+### Status Line
+
+Custom status line showing model, current directory, and context window usage percentage. Configured in `settings.json`.
+
+### Plugins
+
+Two plugins enabled:
+- **frontend-design** — For building frontend interfaces
+- **ralph-wiggum** — Loop detection and prevention
+
+### Always Thinking
+
+`alwaysThinkingEnabled: true` — Claude shows its reasoning process.
+
 ## TTS
 
 I wanted to know when Claude finished without staring at my terminal. Voice notifications solved this.
@@ -161,12 +196,19 @@ Every hook writes JSON to `logs/` in your project directory. Useful for:
 You need:
 - Python 3.11+
 - `uv` package manager
+- `bun` runtime (for TypeScript hooks)
 - Claude Code CLI
 
 Install uv:
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Install bun:
+
+```bash
+curl -fsSL https://bun.sh/install | bash
 ```
 
 Copy this repo to your Claude config:
@@ -192,6 +234,6 @@ Environment variables:
 
 This setup works for how I work. Fork it. Change whatever doesn't fit.
 
-The hooks are Python scripts. The agents are markdown files with system prompts. Everything is readable. Everything is hackable.
+The hooks are Python and TypeScript scripts. The agents are markdown files with system prompts. The skills are self-contained directories. Everything is readable. Everything is hackable.
 
 If you build something interesting on top of this, I'd like to hear about it.
