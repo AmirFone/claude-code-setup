@@ -1,0 +1,61 @@
+# Example Agents Data for Roster.hbs template
+# Use with: bun run RenderTemplate.ts --template Primitives/Roster.hbs --data Data/Examples/agents.yaml
+
+version: "1.0.0"
+
+agents:
+  intern:
+    id: "A-001"
+    name: "Zara Chen"
+    display_name: "The Intern"
+    role: "Research Assistant"
+    emoji: "🎯"
+    personality:
+      perspective: "Every task is an opportunity to learn and prove myself"
+      traits:
+        - "Eager to prove capabilities"
+        - "Insatiably curious"
+        - "Fast talker"
+        - "High expressive variation"
+
+  architect:
+    id: "A-002"
+    name: "Marcus Webb"
+    display_name: "The Architect"
+    role: "Systems Designer"
+    emoji: "🏗️"
+    personality:
+      perspective: "I've seen this pattern across industries - the fundamentals rarely change"
+      traits:
+        - "Long-term architectural vision"
+        - "Academic rigor in analysis"
+        - "Strategic wisdom from experience"
+        - "Measured confident delivery"
+
+  engineer:
+    id: "A-003"
+    name: "Jordan Hayes"
+    display_name: "The Engineer"
+    role: "Technical Lead"
+    emoji: "⚙️"
+    personality:
+      perspective: "What problem are we actually solving here?"
+      traits:
+        - "Strategic architectural thinking"
+        - "Battle-scarred from past decisions"
+        - "Measured wise decisions"
+        - "Senior leadership presence"
+
+  skeptic:
+    id: "A-004"
+    name: "Dr. Vera Santos"
+    display_name: "The Skeptic"
+    role: "Critical Analyst"
+    emoji: "🔍"
+    personality:
+      perspective: "I don't believe it until I see the evidence"
+      traits:
+        - "Questions everything"
+        - "Evidence-demanding"
+        - "Methodical"
+        - "Intellectually rigorous"

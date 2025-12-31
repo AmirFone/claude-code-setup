@@ -1,0 +1,30 @@
+# Example Gates Data for Gate.hbs template
+# Use with: bun run RenderTemplate.ts --template Primitives/Gate.hbs --data Data/Examples/gates.yaml
+
+gate:
+  name: "Code Review Completion Gate"
+  category: "quality-assurance"
+  description: "Checklist to verify code review completeness before merge approval"
+  action_on_fail: "DO NOT APPROVE - Fix issues first"
+
+  mandatory:
+    - name: "All tests pass"
+      description: "CI pipeline shows green status for all test suites"
+    - name: "No security vulnerabilities"
+      description: "Security scan reports no critical or high vulnerabilities"
+    - name: "Type safety verified"
+      description: "TypeScript compilation succeeds with strict mode"
+    - name: "Documentation updated"
+      description: "README and API docs reflect the changes"
+    - name: "Breaking changes documented"
+      description: "Any breaking changes have migration guide"
+
+  recommended:
+    - name: "Code coverage maintained"
+      description: "Test coverage does not decrease from baseline"
+    - name: "Performance impact assessed"
+      description: "Large changes have benchmark results"
+    - name: "Error handling reviewed"
+      description: "Edge cases and error paths are properly handled"
+    - name: "Logging appropriate"
+      description: "Debug and error logs provide useful context"

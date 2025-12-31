@@ -10,3 +10,6 @@ logs/
 # Python
 *.pyc
 __pycache__/
+
+# Node
+node_modules/

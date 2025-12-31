@@ -1,0 +1,48 @@
+# Example Workflow Data for Structure.hbs template
+# Use with: bun run RenderTemplate.ts --template Primitives/Structure.hbs --data Data/Examples/workflow.yaml
+
+workflow:
+  name: "Deep Analysis Protocol"
+  type: "analysis"
+  description: "Multi-phase analysis workflow for complex technical decisions"
+
+phases:
+  - name: "Discovery"
+    duration: "15-20 min"
+    objective: "Gather comprehensive context and requirements"
+    deliverable: "Requirements document and constraints list"
+    steps:
+      - "Review existing documentation"
+      - "Identify stakeholders and their needs"
+      - "Document constraints and non-negotiables"
+      - "Map dependencies and integrations"
+
+  - name: "Analysis"
+    duration: "30-45 min"
+    objective: "Evaluate options against requirements"
+    deliverable: "Comparison matrix and trade-off analysis"
+    steps:
+      - "Enumerate viable options"
+      - "Define evaluation criteria"
+      - "Score each option against criteria"
+      - "Identify risks and mitigations"
+
+  - name: "Synthesis"
+    duration: "15-20 min"
+    objective: "Formulate recommendations"
+    deliverable: "Decision document with rationale"
+    steps:
+      - "Synthesize findings into coherent narrative"
+      - "Draft primary and secondary recommendations"
+      - "Document decision rationale"
+      - "Outline implementation considerations"
+
+  - name: "Validation"
+    duration: "10-15 min"
+    objective: "Verify completeness and accuracy"
+    deliverable: "Final reviewed document"
+    steps:
+      - "Cross-check against original requirements"
+      - "Verify all stakeholder concerns addressed"
+      - "Confirm recommendations are actionable"
+      - "Review for clarity and completeness"

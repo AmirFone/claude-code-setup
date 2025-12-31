@@ -1,0 +1,124 @@
+{
+  "generated": "2025-12-31T18:28:37.355Z",
+  "totalSkills": 6,
+  "alwaysLoadedCount": 1,
+  "deferredCount": 5,
+  "skills": {
+    "core": {
+      "name": "CORE",
+      "path": "CORE/SKILL.md",
+      "fullDescription": "Personal AI Infrastructure core. AUTO-LOADS at session start. USE WHEN any session begins OR user asks about identity, response format, contacts, stack preferences. (user)",
+      "triggers": [
+        "any",
+        "session",
+        "begins",
+        "user",
+        "asks",
+        "about",
+        "identity",
+        "response",
+        "format",
+        "contacts",
+        "stack",
+        "preferences"
+      ],
+      "workflows": [],
+      "tier": "always"
+    },
+    "prompting": {
+      "name": "Prompting",
+      "path": "Prompting/SKILL.md",
+      "fullDescription": "Meta-prompting system for dynamic prompt generation using templates, standards, and patterns. USE WHEN meta-prompting, template generation, prompt optimization, or programmatic prompt composition.",
+      "triggers": [
+        "meta-prompting",
+        "template",
+        "generation",
+        "prompt",
+        "optimization",
+        "programmatic",
+        "composition"
+      ],
+      "workflows": [],
+      "tier": "deferred"
+    },
+    "art": {
+      "name": "Art",
+      "path": "Art/SKILL.md",
+      "fullDescription": "Visual content generation with Excalidraw hand-drawn aesthetic. USE WHEN user wants diagrams, visualizations, comics, or editorial illustrations.",
+      "triggers": [
+        "user",
+        "wants",
+        "diagrams",
+        "visualizations",
+        "comics",
+        "editorial",
+        "illustrations"
+      ],
+      "workflows": [],
+      "tier": "deferred"
+    },
+    "createskill": {
+      "name": "CreateSkill",
+      "path": "CreateSkill/SKILL.md",
+      "fullDescription": "Create and validate skills. USE WHEN create skill, new skill, skill structure, canonicalize. SkillSearch('createskill') for docs.",
+      "triggers": [
+        "create",
+        "skill",
+        "new",
+        "structure",
+        "canonicalize"
+      ],
+      "workflows": [],
+      "tier": "deferred"
+    },
+    "agents": {
+      "name": "Agents",
+      "path": "Agents/SKILL.md",
+      "fullDescription": "Dynamic agent composition and management system. USE WHEN user says create custom agents, spin up custom agents, specialized agents, OR asks for agent personalities, available traits, agent voices. Handles custom agent creation, personality assignment, voice mapping, and parallel agent orchestration.",
+      "triggers": [
+        "user",
+        "says",
+        "create",
+        "custom",
+        "agents",
+        "spin",
+        "specialized",
+        "asks",
+        "for",
+        "agent",
+        "personalities",
+        "available",
+        "traits",
+        "voices"
+      ],
+      "workflows": [],
+      "tier": "deferred"
+    },
+    "writing": {
+      "name": "Writing",
+      "path": "Writing/SKILL.md",
+      "fullDescription": "Literary craftsman for creative writing with masters-level technique. USE WHEN creative writing, fiction, storytelling, dialogue, character craft, prose style, narrative technique, show don't tell, world-building, or explicit content writing.",
+      "triggers": [
+        "creative",
+        "writing",
+        "fiction",
+        "storytelling",
+        "dialogue",
+        "character",
+        "craft",
+        "prose",
+        "style",
+        "narrative",
+        "technique",
+        "show",
+        "don't",
+        "tell",
+        "world-building",
+        "explicit",
+        "content"
+      ],
+      "workflows": [],
+      "tier": "deferred"
+    }
+  }
+}

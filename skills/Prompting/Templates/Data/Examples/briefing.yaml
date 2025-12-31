@@ -1,0 +1,53 @@
+# Example Briefing Data for Briefing.hbs template
+# Use with: bun run RenderTemplate.ts --template Primitives/Briefing.hbs --data Data/Examples/briefing.yaml
+
+briefing:
+  type: "research"
+
+agent:
+  id: "A-001"
+  name: "The Research Specialist"
+  role: "Technical Researcher"
+  personality:
+    perspective: "Every finding should be verified against multiple sources"
+    traits:
+      - "Thorough investigator"
+      - "Evidence-focused"
+      - "Synthesizes complex information"
+      - "Identifies gaps in knowledge"
+
+context:
+  summary: |
+    The team is evaluating three potential database solutions for a new
+    microservices architecture. We need to understand the trade-offs between
+    PostgreSQL, MongoDB, and CockroachDB for our specific use case:
+    high-write throughput, eventual consistency acceptable, and horizontal
+    scaling requirements.
+
+task:
+  description: |
+    Conduct a comprehensive analysis of each database option, focusing on
+    performance characteristics, operational complexity, and cost implications.
+    Provide actionable recommendations based on the specific requirements.
+  questions:
+    - What are the write performance characteristics of each option?
+    - How does each handle horizontal scaling?
+    - What are the operational overhead considerations?
+    - What is the total cost of ownership for each option at our scale?
+
+output_format:
+  type: "structured"
+  structure: |
+    Provide your analysis in the following format:
+
+    ## Executive Summary (2-3 sentences)
+
+    ## Comparison Matrix
+    | Criterion | PostgreSQL | MongoDB | CockroachDB |
+    |-----------|------------|---------|-------------|
+
+    ## Detailed Analysis
+    (Per-database deep dive)
+
+    ## Recommendation
+    (Clear recommendation with rationale)

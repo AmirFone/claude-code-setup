@@ -19,6 +19,8 @@ So I built fixes for all of it.
 
 **5 specialized agents** for debugging, research, writing, refactoring, and security scanning.
 
+**6 skills** that extend Claude's capabilities. Writing craft, agent composition, visual generation, meta-prompting.
+
 **3 TTS providers** that announce when Claude finishes. Your computer talks to you. It sounds gimmicky until you try it.
 
 **3 LLM backends** for generating completion messages and agent names on the fly.
@@ -95,6 +97,36 @@ Handles the tedious work of renaming, restructuring, and modernizing. Doesn't br
 ### `security-vulnerability-hunter`
 
 Scans for prompt injection, XSS, SQL injection, null pointer bugs, memory issues. Reports exact file paths and line numbers with proof-of-concept payloads.
+
+## The Skills
+
+Skills live in `skills/`. Each is a self-contained capability with its own workflows, templates, and tools.
+
+### `CORE`
+
+Auto-loads at session start. Defines identity, personality calibration, response format, and contact information. The foundation everything else builds on.
+
+### `Writing`
+
+Literary craftsman mode. Synthesizes techniques from Hemingway, McCarthy, Highsmith, Ishiguro, Morrison, Orwell, and Didion. Three workflows: write, critique, revise.
+
+Has a banned words list. If I catch myself writing "delve" or "leverage," this skill intervenes.
+
+### `Agents`
+
+Dynamic agent composition. Spin up custom agents with specific personality traits, expertise areas, and voice mappings. Routes between named agents (persistent identities) and dynamic agents (task-specific specialists).
+
+### `Prompting`
+
+Meta-prompting system. Templates, standards, and tools for programmatic prompt generation. Handlebars-based rendering with validation.
+
+### `Art`
+
+Visual content generation with Excalidraw hand-drawn aesthetic. Technical diagrams, blog headers, comics. Dark mode backgrounds, bright accents.
+
+### `CreateSkill`
+
+The skill that creates skills. Enforces structure, validates format, handles canonicalization.
 
 ## TTS
 
