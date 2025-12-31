@@ -1,135 +1,143 @@
 # My Claude Code Setup
 
-Hey, I'm Amir. I spend most of my day working with Claude Code, and over time I've built up a set of hooks, agents, and utilities that make the experience way better. This repo is everything I use.
+I spend most of my day working with Claude Code. This repo is everything I've built to make that experience better.
 
-## Why I Built This
+## The Problem
 
-Claude Code is powerful out of the box. But I wanted more control. I wanted to know when tasks finished without staring at my terminal. I wanted safety rails so Claude couldn't accidentally nuke my home directory. I wanted specialized agents for different types of work.
+Claude Code ships powerful. But I kept wanting things it didn't do:
 
-So I built this.
+- I'd walk away from my terminal, miss the moment Claude finished, come back twenty minutes later
+- Claude would run `rm -rf` on something important
+- I had no record of what happened in a session when things went wrong
+- Every task got the same generalist treatment, whether debugging or research or refactoring
 
-## What's Inside
+So I built fixes for all of it.
 
-**8 hooks** that run at different points in Claude's workflow. They handle safety checks, logging, and audio notifications.
+## What's Here
 
-**5 agents** that specialize in debugging, research, writing, refactoring, and security analysis.
+**8 hooks** that intercept Claude's workflow at key moments. Safety gates, logging, voice notifications.
 
-**3 TTS providers** that talk to you when Claude finishes work. Yes, actual audio. It's surprisingly useful.
+**5 specialized agents** for debugging, research, writing, refactoring, and security scanning.
 
-**3 LLM backends** that generate completion messages and agent names on the fly.
+**3 TTS providers** that announce when Claude finishes. Your computer talks to you. It sounds gimmicky until you try it.
+
+**3 LLM backends** for generating completion messages and agent names on the fly.
 
 ## The Hooks
 
-Every hook runs via `uv run` and gets configured in `settings.json`. Here's what each one does:
+Every hook runs via `uv run`. Configuration lives in `settings.json`.
 
-### `pre_tool_use.py` - The Safety Gate
+### `pre_tool_use.py`
 
-This one runs before Claude executes any tool. It blocks dangerous stuff:
-- Any `rm -rf` variant that could wipe directories
-- Access to `.env` files (your secrets stay secret)
+The safety gate. Runs before Claude executes any tool.
 
-Everything else gets logged to `logs/pre_tool_use.json`. I can go back and see exactly what Claude did in any session.
+It blocks:
+- `rm -rf` variants that could wipe directories
+- Access to `.env` files
 
-### `post_tool_use.py` - Logging What Happened
+Everything else gets logged to `logs/pre_tool_use.json`. Every tool call, timestamped. Useful when you need to reconstruct what Claude did.
 
-Records the results of every tool call. Good for debugging when something goes wrong.
+### `post_tool_use.py`
 
-### `notification.py` - "Your Agent Needs Input"
+Records results of every tool call. When something breaks, you'll know exactly what happened.
 
-When Claude stops and waits for you, this hook speaks up. Literally. It uses TTS to say "Your agent needs your input" so you can step away from the screen and still know when to come back.
+### `notification.py`
 
-### `session_start.py` - Context Loading
+When Claude stops and waits for input, this hook speaks: "Your agent needs your input." Out loud. Through your speakers.
 
-When you start a session, this hook:
-- Checks your git branch and uncommitted changes
-- Loads `CONTEXT.md` and `TODO.md` if they exist
-- Pulls recent GitHub issues if `gh` CLI is installed
+You can leave the room. You'll know when to come back.
+
+### `session_start.py`
+
+Runs when you start a session. Checks your git branch, loads `CONTEXT.md` and `TODO.md` if they exist, pulls recent GitHub issues if `gh` CLI is installed.
 
 Claude starts each session knowing what you're working on.
 
-### `stop.py` - The Finish Line
+### `stop.py`
 
-When Claude finishes, this hook:
-1. Asks an LLM to generate a friendly completion message
-2. Speaks it out loud via TTS
-3. Logs everything to `logs/stop.json`
+When Claude finishes:
+1. An LLM generates a completion message
+2. TTS speaks it aloud
+3. Everything logs to `logs/stop.json`
 
-Instead of just stopping, Claude says something like "All done, ready for your next task!" It sounds small but it changes the feel completely.
+Instead of silence, Claude says "All done, ready for your next task." Small change. Different feel.
 
-### `user_prompt_submit.py` - Prompt Logging and Agent Naming
+### `user_prompt_submit.py`
 
-Logs every prompt you send. Also generates unique agent names using an LLM. Names like "Phoenix" or "Catalyst" instead of "Agent-1234."
+Logs every prompt you send. Also generates unique agent names through an LLM—names like "Phoenix" or "Catalyst" instead of "Agent-1234."
 
 ### `pre_compact.py` and `subagent_stop.py`
 
-Handle context compaction and subagent completion. Less exciting but necessary for keeping things running smoothly.
+Handle context compaction and subagent completion. Plumbing. Necessary plumbing.
 
 ## The Agents
 
-These live in the `agents/` directory. Each has a frontmatter block with name, description, model, and color.
+Each lives in `agents/` with frontmatter defining name, description, model, and color.
 
 ### `debug-investigator`
 
-For tracking down bugs. Give it an error message or stack trace and it traces the issue back to the exact line of code. Uses root cause analysis instead of just finding symptoms.
+Give it an error message or stack trace. It traces the issue to the exact line of code. Root cause analysis, not symptom hunting.
 
 ### `deep-research-got`
 
-My most complex agent. It implements a Graph of Thoughts framework for serious research. Creates a folder structure with research contracts, evidence ledgers, contradiction logs, and a full audit trail. Overkill for simple questions. Perfect for decisions that matter.
+My most complex agent. Implements a Graph of Thoughts framework. Creates a folder structure with research contracts, evidence ledgers, contradiction logs, full audit trail.
+
+Overkill for simple questions. Perfect for decisions that matter.
 
 ### `clarity-researcher-writer`
 
-Research first, write second. It gathers context from your codebase and session, then writes with strict clarity rules. No filler words, no marketing speak, just direct communication.
+Research first, write second. Gathers context from your codebase and session, then writes with strict clarity rules. No filler. No marketing speak. Direct communication.
 
 ### `production-refactor`
 
-For cleaning up code. Handles the boring work of renaming, restructuring, and modernizing without breaking anything.
+Handles the tedious work of renaming, restructuring, and modernizing. Doesn't break things.
 
 ### `security-vulnerability-hunter`
 
-Scans your codebase for security issues. Prompt injection, XSS, SQL injection, null pointer bugs, memory issues. Reports exact file paths and line numbers with proof-of-concept payloads.
+Scans for prompt injection, XSS, SQL injection, null pointer bugs, memory issues. Reports exact file paths and line numbers with proof-of-concept payloads.
 
-## TTS - The Fun Part
+## TTS
 
-I wanted to know when Claude finished without watching the terminal. So I added voice notifications.
+I wanted to know when Claude finished without staring at my terminal. Voice notifications solved this.
 
 The system picks the best available provider:
 
-1. **ElevenLabs** (needs `ELEVENLABS_API_KEY`) - Best quality. Uses Turbo v2.5 model.
-2. **OpenAI** (needs `OPENAI_API_KEY`) - Good quality with streaming.
-3. **pyttsx3** - No API needed. Works offline. Sounds robotic but gets the job done.
+1. **ElevenLabs** (needs `ELEVENLABS_API_KEY`) — Best quality. Turbo v2.5 model.
+2. **OpenAI** (needs `OPENAI_API_KEY`) — Good quality. Streams.
+3. **pyttsx3** — No API. Works offline. Sounds robotic. Gets the job done.
 
-Set your API keys in `.env` and the hooks automatically use the best available option.
+Set your API keys in `.env`. The hooks use the best available option automatically.
 
 ## LLM Backends
 
 Completion messages and agent names come from LLMs. Same fallback pattern:
 
-1. **OpenAI** - GPT-4o-mini for fast responses
-2. **Anthropic** - Claude 3.5 Haiku
-3. **Ollama** - Local models, no API needed
-4. **Hardcoded** - Fallback phrases if nothing else works
+1. **OpenAI** — GPT-4o-mini. Fast.
+2. **Anthropic** — Claude 3.5 Haiku.
+3. **Ollama** — Local models. No API needed.
+4. **Hardcoded** — Fallback phrases when nothing else works.
 
 ## Logging
 
-Every hook writes to `logs/` in your project directory. JSON files you can grep through later. Useful for:
+Every hook writes JSON to `logs/` in your project directory. Useful for:
 - Debugging hook issues
 - Auditing what Claude did
-- Building analytics on your usage
+- Building usage analytics
 
 ## Setup
 
-You'll need:
-- Python 3.11 or higher
+You need:
+- Python 3.11+
 - `uv` package manager
 - Claude Code CLI
 
-Install uv if you don't have it:
+Install uv:
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-Copy this repo to your Claude config location:
+Copy this repo to your Claude config:
 
 ```bash
 cp -r . ~/.claude
@@ -142,14 +150,16 @@ cp .env.sample .env
 # Edit .env with your keys
 ```
 
-Available environment variables:
-- `ELEVENLABS_API_KEY` - For high-quality TTS
-- `OPENAI_API_KEY` - For TTS and completion messages
-- `ANTHROPIC_API_KEY` - For completion messages
-- `ENGINEER_NAME` - Your name (used in personalized messages)
+Environment variables:
+- `ELEVENLABS_API_KEY` — High-quality TTS
+- `OPENAI_API_KEY` — TTS and completion messages
+- `ANTHROPIC_API_KEY` — Completion messages
+- `ENGINEER_NAME` — Your name (for personalized messages)
 
 ## Make It Yours
 
-This setup works for how I work. Fork it and change whatever doesn't fit your workflow. The hooks are just Python scripts. The agents are just markdown files with system prompts. Everything is readable and hackable.
+This setup works for how I work. Fork it. Change whatever doesn't fit.
 
-If you build something cool on top of this, I'd love to hear about it.
+The hooks are Python scripts. The agents are markdown files with system prompts. Everything is readable. Everything is hackable.
+
+If you build something interesting on top of this, I'd like to hear about it.
