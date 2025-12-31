@@ -64,7 +64,7 @@ def main():
             # Generate and play audio directly
             audio = elevenlabs.text_to_speech.convert(
                 text=text,
-                voice_id="21m00Tcm4TlvDq8ikWAM",  # Rachel - standard voice
+                voice_id="21m00Tcm4TlvDq8ikWAM",  # Specified voice
                 model_id="eleven_turbo_v2_5",
                 output_format="mp3_44100_128",
             )
