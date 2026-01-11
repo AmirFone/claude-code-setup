@@ -560,11 +560,21 @@ These patterns mark writing as AI-generated. Avoid them absolutely.
 
 ### BANNED WORDS (never use these):
 
-meticulous, meticulously, delve, delving, navigate (when not literal movement), leverage (as a verb), robust, robustly, cutting-edge, game-changer, game-changing, harness (as in "harness the power"), tapestry (metaphorical), landscape (when not literal geography), realm, beacon, testament, cornerstone, pivotal, multifaceted, comprehensive (as filler), foster (as in "foster growth"), embark, spearhead, underscore, unwavering, ever-evolving, nuanced (especially "nuanced understanding"), palpable, myriad, plethora, paramount
+meticulous, meticulously, delve, delving, navigate (when not literal movement), leverage (as a verb), robust, robustly, cutting-edge, game-changer, game-changing, harness (as in "harness the power"), tapestry (metaphorical), landscape (when not literal geography), realm, beacon, testament, cornerstone, pivotal, multifaceted, comprehensive (as filler), foster (as in "foster growth"), embark, spearhead, underscore, unwavering, ever-evolving, nuanced (especially "nuanced understanding"), palpable, myriad, plethora, paramount, crucial, showcase (as verb), vibrant, enhance, interplay, intricate, intricacies, garner, highlight (when meaning "emphasize"), enduring (legacy/impact), profound (heritage/impact), indelible (mark), deeply rooted
+
+### BANNED SIGNIFICANCE PHRASES (never use these):
+
+- plays a vital/significant/crucial/pivotal role
+- serves as a testament/reminder/beacon
+- stands as a symbol of
+- marks a turning point
+- reflects broader trends/themes
+- underscores the importance of
 
 ### BANNED PHRASES AND CONSTRUCTIONS:
 
 - "It's not just X—it's Y" (the negation reframe)
+- "Not only X, but also Y" (formulaic parallelism)
 - "In today's [adjective] world/landscape/climate..."
 - "Whether you're X or Y, [product] has something for everyone"
 - "X goes beyond Y to deliver Z"
@@ -578,6 +588,47 @@ meticulous, meticulously, delve, delving, navigate (when not literal movement), 
 - "It's worth noting that..."
 - "Needless to say..."
 - "At the end of the day..."
+
+### BANNED SUPERFICIAL ANALYSIS (the "-ing" trap):
+
+Sentence-ending participle phrases that add hollow significance. This is one of the most distinctive AI markers:
+
+- "...ensuring [vague benefit]"
+- "...reflecting [broader concept]"
+- "...highlighting its [importance/significance]"
+- "...contributing to [abstract good]"
+- "...fostering [positive outcome]"
+- "...demonstrating [commitment/dedication]"
+- "...showcasing [achievement]"
+
+**Bad:** "The museum opened in 1995, reflecting the city's commitment to cultural preservation."
+**Good:** "The museum opened in 1995."
+
+If the participle phrase could be deleted without losing essential meaning, delete it.
+
+### BANNED RULE OF THREE:
+
+AI uses triplets formulaically to appear comprehensive. Watch for mechanical three-part lists:
+
+- "comprehensive, robust, and scalable"
+- "innovative, dynamic, and forward-thinking"
+- "engaging, informative, and inspiring"
+
+Not all triplets are bad—but if three adjectives or phrases feel interchangeable or could describe anything, cut to one or two specific ones.
+
+### BANNED VAGUE ATTRIBUTIONS:
+
+Weasel words that attribute claims to unnamed authorities:
+
+- "Experts argue..."
+- "Industry reports suggest..."
+- "Observers have noted..."
+- "Critics point out..."
+- "Studies have shown..." (without citation)
+- "Many believe..."
+- "It is widely recognized..."
+
+Either name the source or state the claim directly.
 
 ### BANNED AI TROPES IN FICTION:
 

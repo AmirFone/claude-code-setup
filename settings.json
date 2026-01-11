@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun run ~/.config/pai/hooks/security-validator.ts"
+            "command": "uv run ~/.claude/hooks/security_validator.py"
           }
         ]
       },
@@ -24,7 +24,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun run ~/.config/pai/hooks/capture-all-events.ts --event-type PreToolUse"
+            "command": "uv run ~/.claude/hooks/capture_events.py --event-type PreToolUse"
           }
         ]
       }
@@ -44,7 +44,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun run ~/.config/pai/hooks/capture-all-events.ts --event-type PostToolUse"
+            "command": "uv run ~/.claude/hooks/capture_events.py --event-type PostToolUse"
           }
         ]
       }
@@ -75,15 +75,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun run ~/.config/pai/hooks/stop-hook-history.ts"
+            "command": "uv run ~/.claude/hooks/stop_learnings.py"
           },
           {
             "type": "command",
-            "command": "bun run ~/.config/pai/hooks/stop-hook-voice.ts"
+            "command": "uv run ~/.claude/hooks/stop_voice.py"
           },
           {
             "type": "command",
-            "command": "bun run ~/.config/pai/hooks/capture-all-events.ts --event-type Stop"
+            "command": "uv run ~/.claude/hooks/capture_events.py --event-type Stop"
           }
         ]
       }
@@ -103,15 +103,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun run ~/.config/pai/hooks/subagent-stop-hook.ts"
+            "command": "uv run ~/.claude/hooks/subagent_voice.py"
           },
           {
             "type": "command",
-            "command": "bun run ~/.config/pai/hooks/subagent-stop-hook-voice.ts"
-          },
-          {
-            "type": "command",
-            "command": "bun run ~/.config/pai/hooks/capture-all-events.ts --event-type SubagentStop"
+            "command": "uv run ~/.claude/hooks/capture_events.py --event-type SubagentStop"
           }
         ]
       }
@@ -130,11 +126,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun run ~/.config/pai/hooks/update-tab-titles.ts"
+            "command": "uv run ~/.claude/hooks/tab_titles.py"
           },
           {
             "type": "command",
-            "command": "bun run ~/.config/pai/hooks/capture-all-events.ts --event-type UserPromptSubmit"
+            "command": "uv run ~/.claude/hooks/capture_events.py --event-type UserPromptSubmit"
           }
         ]
       }
@@ -165,15 +161,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun run ~/.config/pai/hooks/initialize-session.ts"
-          },
-          {
-            "type": "command",
-            "command": "bun run ~/.config/pai/hooks/load-core-context.ts"
-          },
-          {
-            "type": "command",
-            "command": "bun run ~/.config/pai/hooks/capture-all-events.ts --event-type SessionStart"
+            "command": "uv run ~/.claude/hooks/capture_events.py --event-type SessionStart"
           }
         ]
       }
@@ -184,11 +172,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun run ~/.config/pai/hooks/capture-session-summary.ts"
+            "command": "uv run ~/.claude/hooks/session_summary.py"
           },
           {
             "type": "command",
-            "command": "bun run ~/.config/pai/hooks/capture-all-events.ts --event-type SessionEnd"
+            "command": "uv run ~/.claude/hooks/capture_events.py --event-type SessionEnd"
           }
         ]
       }
@@ -196,11 +184,12 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "input=$(cat); dir=$(echo \"$input\" | jq -r '.workspace.current_dir'); model=$(echo \"$input\" | jq -r '.model.display_name'); usage=$(echo \"$input\" | jq '.context_window.current_usage'); if [ \"$usage\" != \"null\" ]; then current=$(echo \"$usage\" | jq '.input_tokens + .cache_creation_input_tokens + .cache_read_input_tokens'); size=$(echo \"$input\" | jq '.context_window.context_window_size'); pct=$((current * 100 / size)); printf '%s | %s | %d%% context' \"$model\" \"$dir\" \"$pct\"; else printf '%s | %s' \"$model\" \"$dir\"; fi"
+    "command": "bash -c 'node \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)dist/index.js\"'"
   },
   "enabledPlugins": {
     "frontend-design@claude-code-plugins": true,
-    "ralph-wiggum@claude-plugins-official": true
+    "ralph-wiggum@claude-plugins-official": true,
+    "claude-hud@claude-hud": true
   },
   "alwaysThinkingEnabled": true
 }

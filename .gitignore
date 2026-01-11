@@ -1,15 +1,19 @@
-# Sensitive data
+# Secrets
 .env
 .env.*
+*.local.json
+
+# Runtime
 logs/
-.claude/
+__pycache__/
+*.pyc
 
 # OS files
 .DS_Store
 
-# Python
-*.pyc
-__pycache__/
-
 # Node
 node_modules/
+
+# Temp (cleanup)
+skills-old/
+hooks-old/

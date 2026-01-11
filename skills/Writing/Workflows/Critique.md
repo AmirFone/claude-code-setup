@@ -23,6 +23,8 @@ Evaluate in order:
 Scan for:
 - Banned words (see CraftGuide.md list)
 - Banned structures ("It's not just X—it's Y", etc.)
+- Superficial analysis participles ("...reflecting broader themes", "...highlighting its importance")
+- Vague attributions ("Experts argue...", "Studies show...")
 - AI fiction tropes ("something in their eyes", etc.)
 - Telling after showing (redundancy trap)
 - Same-voice syndrome in dialogue

@@ -40,6 +40,7 @@ Apply core principles:
 Run through final checks:
 - Clarity: Would smart reader understand on first read?
 - Banned words: Scan and replace any violations
+- Superficial analysis: No sentence-ending "-ing" phrases adding hollow significance?
 - Voice test: Read aloud—sounds human and specific?
 - Redundancy: No explaining after showing?
 - Sensory grounding confirmed?

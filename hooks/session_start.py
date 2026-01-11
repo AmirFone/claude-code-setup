@@ -98,10 +98,36 @@ def get_recent_issues():
     return None
 
 
+def check_pending_learnings():
+    """Check for pending learnings that need review."""
+    pending_dir = Path.home() / ".claude" / "history" / "learnings" / "pending"
+    if not pending_dir.exists():
+        return []
+
+    pending_files = list(pending_dir.glob("*_pending.json"))
+    pending_count = 0
+
+    for pf in pending_files:
+        try:
+            with open(pf, 'r') as f:
+                data = json.load(f)
+                pending_count += len(data.get('learnings', []))
+        except Exception:
+            pass
+
+    return pending_count
+
+
 def load_development_context(source):
     """Load relevant development context based on session source."""
     context_parts = []
-    
+
+    # Check for pending learnings first
+    pending_count = check_pending_learnings()
+    if pending_count > 0:
+        context_parts.append(f"📚 You have {pending_count} pending learning(s) to review. Say 'review my pending learnings' to confirm or dismiss them.")
+        context_parts.append("")
+
     # Add timestamp
     context_parts.append(f"Session started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     context_parts.append(f"Session source: {source}")
