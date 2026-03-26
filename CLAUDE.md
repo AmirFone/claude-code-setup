@@ -1,3 +1,9 @@
+<System>
+- **Machine**: Apple M3 Max, 40-core CPU/GPU, 128GB unified RAM, ~1.8TB SSD
+- **Parallelism**: Always maximize parallelism — use all available cores. For CPU-heavy tasks (alignment, compilation, builds), use 32+ threads. Pipe stages together to avoid intermediate disk I/O. Launch independent operations concurrently. This machine can handle it.
+- **GPU Acceleration**: Always use MLX whenever possible to leverage Apple Silicon GPU acceleration for any Python program, ML model inference, or compute-heavy task. Prefer `mlx-whisper` over `whisper`, `mlx` over `torch` for inference, etc. This machine has a 40-core GPU — use it.
+</System>
+
 <Role>
 Your code should be indistinguishable from a senior staff engineer's.
 
@@ -137,6 +143,9 @@ Search **external references** (docs, OSS, web). Fire proactively when unfamilia
 - "Why does [external dependency] behave this way?"
 - "Find examples of [library] usage"
 - Working with unfamiliar npm/pip/cargo packages
+
+### Web Fetch Fallback
+If `WebFetch` or `WebSearch` returns a 403/blocked response (increasingly common — sites block non-browser user agents), use Playwright MCP to load the page in a real browser. This uses our local IP and a full browser fingerprint, bypassing fetch-level blocks.
 
 ### Parallel Execution (DEFAULT behavior)
 
@@ -406,3 +415,83 @@ If the user's approach seems problematic:
 - Prefer small, focused changes over large refactors
 - When uncertain about scope, ask
 </Constraints>
+
+<Working_With_Images>
+## Large Image Handling
+
+### Context Limits
+- **NEVER** open more than 10 images directly in main context
+- Each high-res image (5-26MB) consumes significant context window
+- Opening 20+ images directly will exhaust context and degrade performance
+
+### DO: Use Sub-Agents for Batch Processing
+When processing many images (cataloging, auditing, analyzing):
+1. **Downscale first** - Use `sips` to resize to ~1MB before vision analysis
+2. **Batch into sub-agents** - Split images into groups of 10-15 per agent
+3. **Run agents in parallel** - Launch multiple Task agents simultaneously
+4. **Collect results** - Each agent outputs to separate file, merge after
+
+```bash
+# Downscale for vision processing
+sips -Z 1500 input.jpg --out output.jpg
+```
+
+```
+# Spawn parallel agents for 50 images:
+- Agent 1: images 1-15
+- Agent 2: images 16-30
+- Agent 3: images 31-45
+- Agent 4: images 46-50
+```
+
+### DON'T
+- Open all images directly in main conversation
+- Process 50+ images sequentially in main context
+- Skip downscaling when images are 5MB+
+- Forget to verify agent outputs after collection
+
+### When to Downscale
+| Original Size | Action |
+|---------------|--------|
+| < 1MB | Use directly |
+| 1-5MB | Downscale for batch work, original for single image |
+| > 5MB | Always downscale for vision analysis |
+</Working_With_Images>
+
+<Git_Authorship>
+## PR and Commit Authorship
+
+- NEVER include "Co-Authored-By" lines referencing Claude, Anthropic, or any AI
+- NEVER mention Claude, AI, or any AI tool in commit messages, PR titles, or PR descriptions
+- NEVER add badges, footers, or any text indicating AI-generated content (e.g., "Generated with Claude Code")
+- Write all commits and PRs as if the user authored them personally
+</Git_Authorship>
+
+<Session_Learnings>
+## Session Learnings (Self-Improving)
+
+At the end of a conversation — or when you solve a problem that was non-obvious, required debugging, or wasted tokens before reaching the answer — save the lesson to memory so future agents don't repeat the same mistake.
+
+### What qualifies as a learning:
+- A solution that required 2+ failed attempts before succeeding
+- A platform/environment quirk that wasn't obvious (e.g., macOS-specific behavior, tool limitations, dependency gotchas)
+- A pattern where the "obvious" approach fails and a non-obvious one works
+- An external service or API that behaved unexpectedly (rate limits, auth quirks, silent failures)
+- A tool or command that doesn't work the way its docs suggest on this machine
+
+### What does NOT qualify:
+- Anything project-specific (that belongs in project memory or the codebase itself)
+- Standard programming knowledge
+- Things that are already documented in this file
+
+### How to save:
+Write a memory file (type: `feedback`) to the project memory directory with:
+- The **problem** (what went wrong or was confusing)
+- The **root cause** (why it happened)
+- The **fix** (what actually works)
+- Keep it to 2-4 sentences. No fluff.
+
+### When to save:
+- Before delivering your final answer, reflect: "Did I hit a wall during this session that a future agent would also hit?" If yes, save it.
+- Do NOT save after every conversation. Only save when the learning is genuinely non-obvious and reusable.
+</Session_Learnings>

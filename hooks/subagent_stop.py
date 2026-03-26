@@ -1,153 +1,166 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
-# dependencies = [
-#     "python-dotenv",
-# ]
+# dependencies = []
 # ///
 
 import argparse
 import json
 import os
+import re
 import sys
-import subprocess
 from pathlib import Path
-from datetime import datetime
 
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    pass  # dotenv is optional
+sys.path.insert(0, str(Path(__file__).parent / "lib"))
+from local_tts import speak
 
 
-def get_tts_script_path():
-    """
-    Determine which TTS script to use based on available API keys.
-    Priority order: ElevenLabs > OpenAI > pyttsx3
-    """
-    # Get current script directory and construct utils/tts path
-    script_dir = Path(__file__).parent
-    tts_dir = script_dir / "utils" / "tts"
-    
-    # Check for ElevenLabs API key (highest priority)
-    if os.getenv('ELEVENLABS_API_KEY'):
-        elevenlabs_script = tts_dir / "elevenlabs_tts.py"
-        if elevenlabs_script.exists():
-            return str(elevenlabs_script)
-    
-    # Check for OpenAI API key (second priority)
-    if os.getenv('OPENAI_API_KEY'):
-        openai_script = tts_dir / "openai_tts.py"
-        if openai_script.exists():
-            return str(openai_script)
-    
-    # Fall back to pyttsx3 (no API key required)
-    pyttsx3_script = tts_dir / "pyttsx3_tts.py"
-    if pyttsx3_script.exists():
-        return str(pyttsx3_script)
-    
-    return None
+def find_task_result(transcript_path: str):
+    path = Path(transcript_path)
+    if not path.exists():
+        parent_dir = path.parent
+        if parent_dir.exists():
+            agent_files = sorted(
+                [f for f in parent_dir.glob("agent-*.jsonl")],
+                key=lambda f: f.stat().st_mtime,
+                reverse=True,
+            )
+            if agent_files:
+                path = agent_files[0]
 
+    if not path.exists():
+        return None, None, None
 
-def announce_subagent_completion():
-    """Announce subagent completion using the best available TTS service."""
     try:
-        tts_script = get_tts_script_path()
-        if not tts_script:
-            return  # No TTS scripts available
-        
-        # Use fixed message for subagent completion
-        completion_message = "Subagent Complete"
-        
-        # Call the TTS script with the completion message
-        subprocess.run([
-            "uv", "run", tts_script, completion_message
-        ], 
-        capture_output=True,  # Suppress output
-        timeout=10  # 10-second timeout
-        )
-        
-    except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
-        # Fail silently if TTS encounters issues
-        pass
+        lines = path.read_text().strip().split("\n")
+        for i in range(len(lines) - 1, -1, -1):
+            try:
+                entry = json.loads(lines[i])
+                if entry.get("type") != "assistant":
+                    continue
+                for content_item in entry.get("message", {}).get("content", []):
+                    if content_item.get("type") == "tool_use" and content_item.get("name") == "Task":
+                        tool_input = content_item.get("input", {})
+                        description = tool_input.get("description")
+                        tool_use_id = content_item.get("id")
+                        agent_type = tool_input.get("subagent_type", "default")
+
+                        for j in range(i + 1, len(lines)):
+                            try:
+                                result_entry = json.loads(lines[j])
+                            except json.JSONDecodeError:
+                                continue
+                            if result_entry.get("type") != "user":
+                                continue
+                            for rc in result_entry.get("message", {}).get("content", []):
+                                if rc.get("type") == "tool_result" and rc.get("tool_use_id") == tool_use_id:
+                                    content = rc.get("content")
+                                    if isinstance(content, str):
+                                        return content, agent_type, description
+                                    elif isinstance(content, list):
+                                        text = "\n".join(
+                                            item.get("text", "") for item in content if item.get("type") == "text"
+                                        )
+                                        return text, agent_type, description
+            except json.JSONDecodeError:
+                continue
     except Exception:
-        # Fail silently for any other errors
         pass
+
+    return None, None, None
+
+
+def clean_for_speech(text: str) -> str:
+    text = re.sub(r"<system-reminder>[\s\S]*?</system-reminder>", "", text)
+    text = re.sub(r"```[\s\S]*?```", "code block", text)
+    text = re.sub(r"`[^`]+`", "", text)
+    text = re.sub(r"\*{1,2}([^*]+)\*{1,2}", r"\1", text)
+    text = re.sub(r"#{1,6}\s*", "", text)
+    text = re.sub(r"[\U0001F300-\U0001F9FF]", "", text)
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
+
+
+def extract_completion(task_output: str, description: str) -> str:
+    cleaned = clean_for_speech(task_output)
+
+    for pattern in [
+        r"COMPLETED:?\s*(?:\[AGENT:\w+[-\w]*\]\s*)?(.+?)(?:\n|$)",
+        r"Done[.!:]\s*(.+?)(?:\n|$)",
+    ]:
+        match = re.search(pattern, cleaned, re.IGNORECASE)
+        if match and len(match.group(1).strip()) > 5:
+            return match.group(1).strip()[:200]
+
+    if description:
+        return f"Finished {description}"
+
+    sentences = re.split(r"[.!?\n]", cleaned)
+    for s in sentences:
+        s = s.strip()
+        if len(s) > 10:
+            return s[:200]
+
+    return "Subagent complete"
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--chat", action="store_true")
+    parser.add_argument("--notify", action="store_true")
+    args = parser.parse_args()
+
     try:
-        # Parse command line arguments
-        parser = argparse.ArgumentParser()
-        parser.add_argument('--chat', action='store_true', help='Copy transcript to chat.json')
-        parser.add_argument('--notify', action='store_true', help='Enable TTS completion announcement')
-        args = parser.parse_args()
-        
-        # Read JSON input from stdin
         input_data = json.load(sys.stdin)
+    except json.JSONDecodeError:
+        sys.exit(0)
 
-        # Extract required fields
-        session_id = input_data.get("session_id", "")
-        stop_hook_active = input_data.get("stop_hook_active", False)
+    log_dir = os.path.join(os.getcwd(), "logs")
+    os.makedirs(log_dir, exist_ok=True)
+    log_path = os.path.join(log_dir, "subagent_stop.json")
 
-        # Ensure log directory exists
-        log_dir = os.path.join(os.getcwd(), "logs")
-        os.makedirs(log_dir, exist_ok=True)
-        log_path = os.path.join(log_dir, "subagent_stop.json")
-
-        # Read existing log data or initialize empty list
+    try:
         if os.path.exists(log_path):
-            with open(log_path, 'r') as f:
-                try:
-                    log_data = json.load(f)
-                except (json.JSONDecodeError, ValueError):
-                    log_data = []
+            with open(log_path, "r") as f:
+                log_data = json.load(f)
         else:
             log_data = []
-        
-        # Append new data
-        log_data.append(input_data)
-        
-        # Write back to file with formatting
-        with open(log_path, 'w') as f:
-            json.dump(log_data, f, indent=2)
-        
-        # Handle --chat switch (same as stop.py)
-        if args.chat and 'transcript_path' in input_data:
-            transcript_path = input_data['transcript_path']
-            if os.path.exists(transcript_path):
-                # Read .jsonl file and convert to JSON array
+    except (json.JSONDecodeError, ValueError):
+        log_data = []
+
+    log_data.append(input_data)
+    with open(log_path, "w") as f:
+        json.dump(log_data, f, indent=2)
+
+    if args.chat and "transcript_path" in input_data:
+        transcript_path = input_data["transcript_path"]
+        if os.path.exists(transcript_path):
+            try:
                 chat_data = []
-                try:
-                    with open(transcript_path, 'r') as f:
-                        for line in f:
-                            line = line.strip()
-                            if line:
-                                try:
-                                    chat_data.append(json.loads(line))
-                                except json.JSONDecodeError:
-                                    pass  # Skip invalid lines
-                    
-                    # Write to logs/chat.json
-                    chat_file = os.path.join(log_dir, 'chat.json')
-                    with open(chat_file, 'w') as f:
-                        json.dump(chat_data, f, indent=2)
-                except Exception:
-                    pass  # Fail silently
+                with open(transcript_path, "r") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line:
+                            try:
+                                chat_data.append(json.loads(line))
+                            except json.JSONDecodeError:
+                                pass
+                chat_file = os.path.join(log_dir, "chat.json")
+                with open(chat_file, "w") as f:
+                    json.dump(chat_data, f, indent=2)
+            except Exception:
+                pass
 
-        # Announce subagent completion via TTS (only if --notify flag is set)
-        if args.notify:
-            announce_subagent_completion()
+    if args.notify:
+        transcript_path = input_data.get("transcript_path", "")
+        completion = "Subagent complete"
+        if transcript_path:
+            task_output, agent_type, description = find_task_result(transcript_path)
+            if task_output:
+                completion = extract_completion(task_output, description)
+        speak(completion)
 
-        sys.exit(0)
-
-    except json.JSONDecodeError:
-        # Handle JSON decode errors gracefully
-        sys.exit(0)
-    except Exception:
-        # Handle any other errors gracefully
-        sys.exit(0)
+    sys.exit(0)
 
 
 if __name__ == "__main__":

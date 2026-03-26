@@ -79,10 +79,6 @@
           },
           {
             "type": "command",
-            "command": "uv run ~/.claude/hooks/stop_voice.py"
-          },
-          {
-            "type": "command",
             "command": "uv run ~/.claude/hooks/capture_events.py --event-type Stop"
           }
         ]
@@ -101,10 +97,6 @@
       {
         "matcher": "*",
         "hooks": [
-          {
-            "type": "command",
-            "command": "uv run ~/.claude/hooks/subagent_voice.py"
-          },
           {
             "type": "command",
             "command": "uv run ~/.claude/hooks/capture_events.py --event-type SubagentStop"
@@ -189,7 +181,10 @@
   "enabledPlugins": {
     "frontend-design@claude-code-plugins": true,
     "ralph-wiggum@claude-plugins-official": true,
-    "claude-hud@claude-hud": true
+    "claude-hud@claude-hud": true,
+    "ralph-wiggum@claude-code-plugins": true,
+    "playwright@claude-plugins-official": true
   },
-  "alwaysThinkingEnabled": true
+  "alwaysThinkingEnabled": true,
+  "skipDangerousModePermissionPrompt": true
 }

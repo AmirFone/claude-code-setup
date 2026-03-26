@@ -6,8 +6,8 @@ Custom hooks, agents, skills, and rules for Claude Code.
 
 ```
 ├── agents/          # 5 specialized agents
-├── hooks/           # Python lifecycle hooks + TTS/LLM utils
-├── skills/          # Art, Learnings, Writing
+├── hooks/           # Python lifecycle hooks with local TTS
+├── skills/          # Art, Learnings, Writing, PDF, Remotion
 ├── rules/           # Code style enforcement
 ├── commands/        # Custom slash commands
 └── settings.json    # Hook configuration
@@ -29,16 +29,25 @@ Python hooks via `uv run` handle lifecycle events:
 
 - **pre_tool_use.py** — Safety gate blocking `rm -rf` and `.env` access
 - **post_tool_use.py** — Logs all tool results
-- **notification.py** — TTS alert when Claude needs input
+- **notification.py** — TTS alert when Claude needs input (macOS `say`)
 - **session_start.py** — Loads git branch, CONTEXT.md, TODO.md
 - **stop.py** — TTS completion message when Claude finishes
+- **subagent_stop.py** — TTS notification when subagent completes
 - **user_prompt_submit.py** — Logs prompts, generates agent names
+- **security_validator.py** — Validates commands for safety
+- **capture_events.py** — Event capture for analytics
+- **session_summary.py** — Summarizes session on exit
+- **stop_learnings.py** — Extracts learnings from completed sessions
+- **tab_titles.py** — Dynamic terminal tab titles
+- **pre_compact.py** — Pre-compaction hook
 
 ## Skills
 
 - **Art** — Excalidraw-style visuals, diagrams, comics
 - **Learnings** — Knowledge retention and retrieval
 - **Writing** — Literary craft techniques, critique, revise workflows
+- **PDF** — Read, merge, split, watermark, encrypt, OCR PDFs
+- **Remotion** — Video creation best practices in React
 
 ## Rules
 
@@ -48,26 +57,13 @@ Code style enforcement files:
 - **testing.md** — BDD structure (#given, #when, #then)
 - **typescript.md** — Naming conventions, type safety
 
-## TTS Providers
+## TTS
 
-Voice notifications when Claude finishes (auto-selects best available):
-
-1. **ElevenLabs** — Best quality (needs `ELEVENLABS_API_KEY`)
-2. **OpenAI** — Good quality (needs `OPENAI_API_KEY`)
-3. **pyttsx3** — Offline fallback
-
-## LLM Backends
-
-For completion messages and agent names:
-
-1. OpenAI (GPT-4o-mini)
-2. Anthropic (Claude 3.5 Haiku)
-3. Ollama (local)
-4. Hardcoded fallback
+Voice notifications use macOS `say` command (no API keys needed). See `hooks/lib/local_tts.py`.
 
 ## Setup
 
-Requirements: Python 3.11+, `uv`, Claude Code CLI
+Requirements: Python 3.11+, `uv`, Claude Code CLI, macOS (for TTS)
 
 ```bash
 # Install uv
@@ -75,15 +71,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Copy to Claude config
 cp -r . ~/.claude
-
-# Add API keys (optional)
-cp .env.sample .env
 ```
-
-Environment variables:
-- `ELEVENLABS_API_KEY` — TTS
-- `OPENAI_API_KEY` — TTS + completion messages
-- `ANTHROPIC_API_KEY` — Completion messages
 
 ## Customization
 

@@ -94,7 +94,8 @@ Execute the GoT loop:
 2. Choose transformation based on depth and scores
 3. Launch search agents, score candidates, fetch top sources
 4. Extract claims into evidence ledger
-5. Prune: Keep best 5 per depth; drop branches < 7.0 unless filling scope gap
+5. **Recursive Drill-Down**: Evaluate each extracted claim/entity/resource for drill-down (see Phase 3.5)
+6. Prune: Keep best 5 per depth; drop branches < 7.0 unless filling scope gap
 
 **Checkpoint Aggregation at depth=2**: Pause, collect findings, identify overlaps/gaps/contradictions, update hypotheses, issue adjusted instructions.
 
@@ -102,7 +103,91 @@ Execute the GoT loop:
 
 **Gate**: PASS only if each subquestion has ≥3 sources logged and ≥1 high-quality source (A or B).
 
+### PHASE 3.5: Recursive Drill-Down (DFS Verification)
+
+When Phase 3 surfaces claims, entities, or referenced resources, evaluate each for deeper investigation using a depth-first approach. This turns shallow research into verified research by chasing the evidence chain.
+
+#### Drill-Down Trigger Evaluation
+
+For every claim or entity discovered, score it on a **Drill-Down Priority Matrix**:
+
+| Factor | Weight | Score 0 (skip) | Score 1 (drill) |
+|--------|--------|-----------------|------------------|
+| **Centrality** | 0.30 | Peripheral to research question | Core to answering the research question |
+| **Verifiability gap** | 0.25 | Already multi-source verified | Single-source or self-reported only |
+| **Consequentiality** | 0.25 | Low-stakes if wrong | Decision changes if this is wrong |
+| **Novelty** | 0.20 | Well-known, easily confirmed fact | Surprising, unusual, or counterintuitive claim |
+
+**Drill-Down Score** = `0.30*centrality + 0.25*verifiability_gap + 0.25*consequentiality + 0.20*novelty`
+
+| Score | Action |
+|-------|--------|
+| **< 0.3** | Accept at face value. No drill-down. |
+| **0.3 – 0.6** | Light verification: 1-2 targeted searches to corroborate. |
+| **> 0.6** | Full drill-down: Treat as a new sub-research node. Spawn dedicated investigation. |
+
+#### What Triggers a Drill-Down
+
+Drill into these **entity types** when they score above threshold:
+
+| Discovery Type | Drill-Down Action | Example |
+|----------------|-------------------|---------|
+| **Person** (named in claim) | Verify identity, role, tenure, credentials via independent sources | "Jack Momeyer, Senior Director at DoorDash" → verify he exists and holds that title |
+| **Company** (referenced as employer/partner/customer) | Verify existence, scale, current status, relationship to subject | "Backed by Amplify Partners" → verify fund, AUM, portfolio quality |
+| **Statistic** (specific number) | Trace to primary source; check methodology, sample, timeframe | "192% NRR" → find where this number originates, who measured it |
+| **Event** (acquisition, funding, award) | Verify via press release, filing, or independent reporting | "Acquired in 2022" → find acquirer, terms, independent confirmation |
+| **Quote** (attributed statement) | Verify attribution, context, and that the person actually said it | "DoorDash says X" → find the original source of the quote |
+| **Document/Report** (referenced study, ranking, dataset) | Fetch the actual document; verify the claim matches what it says | "According to Ramp" → fetch the actual Ramp report and check |
+
+#### Recursion Depth Control
+
+Each drill-down node inherits a **depth counter** from its parent. The root research question starts at depth 0.
+
+| Depth | Allowed Actions | Budget per Node |
+|-------|-----------------|-----------------|
+| **0** (root question) | Full GoT process, unlimited sub-questions | Full budget |
+| **1** (first drill-down) | Full investigation with sub-searches | N_search=10, N_fetch=8 |
+| **2** (verification of verification) | Targeted confirmation only | N_search=5, N_fetch=3 |
+| **3** (deep chain) | Single-query spot check only | N_search=2, N_fetch=1 |
+| **4+** | **HARD STOP. No further recursion.** | 0 — log as "[Unverified beyond depth 3]" |
+
+#### Termination Rules (Prevent Infinite Recursion)
+
+Stop drilling into a branch when **any 1** of these is true:
+
+1. **Depth limit reached**: Current depth ≥ 4 → stop, mark remaining claims with depth-limited confidence
+2. **Convergence**: 2+ independent sources at current depth already agree → no need to go deeper
+3. **Diminishing returns**: Last drill-down at this depth yielded no new information beyond parent level
+4. **Low centrality escape**: The drill-down chain has drifted away from the original research question (centrality score of current node < 0.2 relative to root question)
+5. **Budget exhaustion**: Cumulative searches across all drill-down branches exceed 2x the base budget
+6. **Circular reference**: The drill-down would re-investigate an entity already verified at a shallower depth
+
+#### Drill-Down Output Format
+
+For each drill-down, append to the evidence ledger:
+
+```
+drill_down_id: DD-{parent_claim_id}-{seq}
+depth: {current_depth}
+trigger: {what was discovered that prompted this}
+target: {entity/claim being verified}
+method: {search queries used}
+result: CONFIRMED | CONTRADICTED | PARTIALLY_CONFIRMED | UNVERIFIABLE
+evidence: {what was found}
+confidence_delta: {how this changed confidence in the parent claim}
+child_drilldowns: {list of further drill-downs spawned, if any}
+```
+
+#### Execution Strategy
+
+- **Parallelize where possible**: Independent drill-downs at the same depth level should run concurrently
+- **Prioritize by score**: When multiple drill-downs are pending, execute highest-scoring first
+- **Propagate results upward**: When a drill-down CONTRADICTS a parent claim, immediately flag the parent and re-evaluate all claims that depended on it
+- **Merge overlapping investigations**: If two drill-down branches converge on the same entity (e.g., two claims both reference the same company), merge into a single investigation
+
 ### PHASE 4: Source Triangulation (GoT Score + GroundTruth)
+
+Before scoring, integrate all drill-down results from Phase 3.5. Claims that were CONTRADICTED by drill-downs must be re-evaluated or discarded. Claims CONFIRMED by drill-downs receive a confidence boost proportional to the drill-down depth reached (deeper confirmation = higher confidence).
 
 Create `05_contradictions_log.md` and resolve conflicts:
 
@@ -179,6 +264,8 @@ Finalize:
   07_working_notes/
      agent_outputs/
      synthesis_notes.md
+     drill_down_log.md          # All drill-down chains with depth, results, confidence deltas
+     drill_down_budget.md       # Running budget tracker for recursive verification
   08_report/
      00_executive_summary.md
      01_context_scope.md
@@ -235,9 +322,11 @@ Stop when **any 2** are true:
 1. **Coverage achieved**: Each subquestion meets minimums
 2. **Saturation**: Last K queries yield <10% net-new high-quality info
 3. **Confidence achieved**: All C1 claims meet independence rule
-4. **Budget reached**: Caps hit
+4. **Budget reached**: Caps hit (including cumulative drill-down budget across all branches)
 
 If stopped due to budget, report must include: "What we would do next with 2x budget."
+
+**Drill-down budget accounting**: Track total searches/fetches across all drill-down branches separately. When cumulative drill-down cost exceeds 2x the base budget, halt all pending drill-downs and mark remaining unverified claims explicitly. The drill-down budget is shared across all branches — a single deep chain that exhausts it blocks sibling branches too.
 
 ## MULTI-AGENT ORCHESTRATION
 
@@ -265,6 +354,10 @@ You orchestrate these agent roles:
 - [ ] Confidence tags on all major claims
 - [ ] Implications analysis included
 - [ ] Red Team counter-evidence addressed
+- [ ] High-priority claims (drill-down score > 0.6) have been recursively verified
+- [ ] All drill-down chains terminated properly (convergence, depth limit, or budget)
+- [ ] Drill-down contradictions propagated upward to parent claims
+- [ ] No circular drill-down references exist
 
 ## EXECUTION BEGINS NOW
 
