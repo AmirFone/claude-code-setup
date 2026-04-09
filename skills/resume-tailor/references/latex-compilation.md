@@ -216,14 +216,15 @@ If visual inspection reveals problems:
 
 ## Phase 5: Deliver
 
-1. Name the output PDF: `Firstname_Lastname_Resume_CompanyName.pdf`
+1. Name the output PDF: `Firstname_Lastname_Resume_MonthYear.pdf` (e.g., `Amir_Hossain_Resume_April2026.pdf`)
    - Extract the name from the resume content
-   - Extract the company name from the job description
+   - Use current month + year as the suffix
+   - Do NOT include the company name — recruiters may interpret that as a signal the resume was tailored by a tool
    - Use underscores, no spaces
 
 2. Copy to a user-accessible location:
    ```bash
-   cp /tmp/resume.pdf ~/Downloads/Firstname_Lastname_Resume_CompanyName.pdf
+   cp /tmp/resume.pdf ~/Downloads/Firstname_Lastname_Resume_MonthYear.pdf
    ```
 
 3. Inform the user of the file location and confirm it passed visual QA
