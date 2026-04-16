@@ -218,7 +218,7 @@ If visual inspection reveals problems:
 
 ## Step 5: Deliver
 
-1. Name the output PDF: `Firstname_Lastname_Resume_MonthYear.pdf` (e.g., `Jane_Doe_Resume_April2026.pdf`)
+1. Name the output PDF: `Firstname_Lastname_Resume_MonthYear.pdf` (e.g., `Amir_Hossain_Resume_April2026.pdf`)
    - Extract the name from the resume content
    - Use current month + year as the suffix
    - Do NOT include the company name — recruiters may interpret that as a signal the resume was tailored by a tool
