@@ -32,6 +32,12 @@
         "version": "unknown",
         "gitCommitSha": "205b6e0b30366a969412d9aab7b99bea99d58db1"
       }
+    ],
+    "rust-analyzer-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "version": "1.0.0"
+      }
     ]
   }
 }

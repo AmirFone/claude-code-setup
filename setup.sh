@@ -57,6 +57,7 @@ if command -v claude &> /dev/null; then
   install_plugin "claude-hud" "claude-hud"
   install_plugin "claude-code-plugins" "ralph-wiggum"
   install_plugin "claude-plugins-official" "playwright"
+  install_plugin "claude-plugins-official" "rust-analyzer-lsp"
 else
   echo "  'claude' CLI not found. Install plugins manually after installing Claude Code."
   echo "  Plugins to install:"
@@ -65,6 +66,7 @@ else
   echo "    - claude-hud (jarrodwatts/claude-hud)"
   echo "    - ralph-wiggum (anthropics/claude-code)"
   echo "    - playwright (anthropics/claude-plugins-official)"
+  echo "    - rust-analyzer-lsp (anthropics/claude-plugins-official)"
 fi
 
 echo ""

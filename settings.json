@@ -183,9 +183,10 @@
     "ralph-wiggum@claude-plugins-official": true,
     "claude-hud@claude-hud": true,
     "ralph-wiggum@claude-code-plugins": true,
-    "playwright@claude-plugins-official": true
+    "playwright@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true
   },
   "alwaysThinkingEnabled": true,
-  "skipDangerousModePermissionPrompt": true,
-  "effortLevel": "high"
+  "effortLevel": "high",
+  "skipDangerousModePermissionPrompt": true
 }
